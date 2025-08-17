@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Maze-Solving AI – Algorithms & Data Structures</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<header>
+  <h1>Maze-Solving Neural Network</h1>
+  <nav><a href="../index.html">← Back to Portfolio</a></nav>
+</header>
+
+<main>
+  <section>
+    <h2>Original Artifact</h2>
+    <p>
+     The initial project was a neural network maze-solving algorithm. The original design was a 2000 epoch deep learning machine that would eventually solve a 5x5 maze array. 
+    </p>
+    <p>
+     The most pressing concern of this design was that my hardware simply did not have the memory capabilities required to run 2000 epochs with potentially thousands of steps in between them. This one was interesting to solve. I originally tried to portion virtual ram and limit the memory that the algorithm would consume, but quickly understood that this learning process was just too exhaustive for my hardware. It needed a total overhaul.
+    </p>
+  </section>
+
+  <section>
+    <h2>Base Code Review</h2>
+    <video controls width="860">
+      <source src="../assets/videos/ailow.mov" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+  </section>
+  
+  <section>
+    <h2>Enhancement Implemented</h2>
+    <h2>Breadth-First Search Algorithm</h2>
+    <p>
+      The featured enhancement of this artifact is a breadth-first search algorithm:<br>
+      <code>
+        def seed_with_bfs(exp_replay, maze_env, path):<br>
+    for i in range(len(path) - 1):<br>
+        cur = path[i]<br>
+        nxt = path[i+1]<br>
+
+        # Convert to state/action/next_state<br>
+        maze_env.reset(cur)<br>
+        state = maze_env.observe()<br>
+
+        # Determine action index<br>
+        r1, c1 = cur<br>
+        r2, c2 = nxt<br>
+        if r2 == r1 - 1: action = 1   # UP<br>
+        elif r2 == r1 + 1: action = 3 # DOWN<br>
+        elif c2 == c1 - 1: action = 0 # LEFT<br>
+        elif c2 == c1 + 1: action = 2 # RIGHT<br>
+
+        next_state, reward, status = maze_env.act(action)<br>
+
+        # Force high reward for expert path<br>
+        reward = 1.0 if i == len(path)-2 else 0.3<br>
+        if i == len(path)-2:<br>
+            status = 'win'<br>
+
+        exp_replay.remember([state, action, reward, next_state, status])<br>
+      </code> <br>
+        This function seeds each agent with an exploited pathway from origin to goal state. The algorithm now learns with a solution critic. This feeds into: <br><br>
+      <h2>Seeded Maze-Solving Algorithm</h2>
+
+      <code>def ratRace(model, maze_array, n_epoch=150, max_memory=500, data_size=32):<br>
+    epsilon = 0.6<br>
+    min_epsilon = 0.05<br>
+    decay_rate = 0.98<br>
+    max_steps = 250<br>
+
+    maze_env = RatMaze(maze_array)<br>
+    maze_env.goal = (maze_array.shape[0]-1, maze_array.shape[1]-1)  # Explicit goal<br>
+    exp_replay = Experience(model, max_memory=max_memory)<br>
+    win_history = []<br>
+    best_path = []<br>
+    best_reward = -999<br>
+    start_time = datetime.datetime.now()<br>
+
+    # Breadth-First Search<br>
+    start = (0, 0)<br>
+    goal = (maze_array.shape[0]-1, maze_array.shape[1]-1)<br>
+    shortest_path = bfs_shortest_path(maze_array, start=start, goal=goal)<br>
+    if shortest_path is None:<br>
+        raise ValueError("No path found in maze!")<br>
+    seed_with_bfs(exp_replay, maze_env, shortest_path)<br>
+
+    # Train Loop <br>
+    csv_path = "ratRacing_log.csv"<br>
+    with open(csv_path, "w", newline="") as f:<br>
+        writer = csv.writer(f)<br>
+        writer.writerow(["epoch", "avg_loss", "win_rate", "epsilon"])<br>
+<br>
+    for epoch in range(n_epoch):<br>
+        maze_env.reset((0, 0)) <br>
+        envstate = maze_env.observe()<br>
+        step_count = 0<br>
+        losses = []<br>
+        episode = [None, None, None, None, 'lose']<br>
+<br>
+        # Track reward + path for this episode<br>
+        episode_reward = 0<br>
+        path_this_episode = []<br>
+<br>
+        while maze_env.game_status() == 'not_over' and step_count < max_steps:<br>
+            # Epsilon-greedy<br>
+            if np.random.rand() < epsilon:<br>
+                action = random.choice(maze_env.valid_actions())<br>
+            else:<br>
+                action = np.argmax(exp_replay.predict(envstate))<br>
+<br>
+            prev_r, prev_c, _ = maze_env.state<br>
+            next_state, reward, status = maze_env.act(action)<br>
+<br>
+            # Reward shaping<br>
+            goal_r, goal_c = maze_env.goal<br>
+            dist_before = abs(prev_r - goal_r) + abs(prev_c - goal_c)<br>
+            next_r, next_c, _ = maze_env.state<br>
+            dist_after = abs(next_r - goal_r) + abs(next_c - goal_c)<br>
+<br>
+            if dist_after < dist_before:<br>
+                reward += 0.3<br>
+            reward -= 0.02  # step penalty<br>
+            if status == 'win':<br>
+                reward += 1.0  # big reward on win<br>
+<br>
+            # Track cumulative reward + path<br>
+            episode_reward += reward<br>
+            path_this_episode.append((next_r, next_c))<br>
+<br>
+            episode = [envstate, action, reward, next_state, status]<br>
+            exp_replay.remember(episode)<br>
+            envstate = next_state<br>
+            step_count += 1<br>
+<br>
+        # Track win/lose<br>
+        win_history.append(1 if episode[4] == 'win' else 0)<br>
+<br>
+        # Save best path ONLY if this episode was a win and better than previous best<br>
+        if episode[4] == 'win' and episode_reward > best_reward:<br>
+            best_reward = episode_reward<br>
+            best_path = path_this_episode.copy()<br>
+<br>
+        # Train from memory<br>
+        if len(exp_replay.memory) >= data_size:<br>
+            input_data, targets = exp_replay.get_data(data_size=data_size)<br>
+            model.fit(input_data, targets, epochs=1, batch_size=32, verbose=0)<br>
+            loss = model.evaluate(input_data, targets, verbose=0)<br>
+            losses.append(loss)<br>
+<br>
+        # Epsilon decay<br>
+        epsilon = max(min_epsilon, epsilon * decay_rate)<br>
+<br>
+        avg_loss = np.mean(losses) if losses else 0<br>
+        win_rate = sum(win_history) / len(win_history)<br>
+        print(f"[Epoch {epoch}] Loss={avg_loss:.4f} | WinRate={win_rate:.3f} | Eps={epsilon:.3f}")<br>
+<br>
+        # Log<br>
+        with open(csv_path, "a", newline="") as f:<br>
+            writer = csv.writer(f)<br>
+            writer.writerow([epoch, avg_loss, win_rate, epsilon])<br>
+<br>
+        # Early stop on solve<br>
+        if win_rate > 0.9 and epoch > 20:<br>
+            print("Solved — terminating training.")<br>
+            break<br>
+<br>
+    # Plot path (or fallback to shortest path)<br>
+    plot_final_path(maze_array, best_path if best_path else shortest_path)<br>
+<br>
+    print(f"Solved in {(datetime.datetime.now()-start_time).total_seconds():.1f}s")<br>
+    return csv_path, best_path if best_path else shortest_path<br>
+</code><br>
+The seeded algorithm now solves the previous 5x5 maze array in 21 epochs, cutting down from the previous 2000 epoch learning algorithm. This particular enhancement now features a 10x10 maze array solvwed in 150 epochs, just to further display the improvements of this solution.
+    </p>
+  </section>
+<section>
+  <h2>Enhancement Demonstration</h2>
+  <img src="../assets/images/10x10Solved.PNG" alt="Enhancement Demonstration" width="640">
+</section>
+
+
+
+  <section>
+    <h2>Artifact Narrative</h2>
+  </section>
+  <section>
+    <h2>Robert Tryon's Dull Learning Algorithm</h2>
+    <p>
+    After sleepless nights and gigs of vram, I decided to turn to the history of the puzzle I was trying to solve, the maze. The first instance I ran into was Robert Tryon, the inventor of the now famous rat and cheese maze experiment. In very 1930s fashion, he attempted to settle a debate of genetic predisposition to intelligence using generations of selectively bred rats. He would grant the rats that reached the cheese the moniker of 'bright', and the ones that didn't as 'dull'. He would breed each rat with another of the same moniker, each generation building upon the last until 7 generations later he had created a species of rat that could solve the maze in the shortest route possible. Sound familiar? The man was essentially creating a genetic backpropogation to solve the maze. What struck me were not the incredibly outdated eugenic remarks about the results, but rather that in all of his experimentation, not once did Tryon try to improve the success rate of the rats on an individual level. I did not have the memory for generations of rats to build a backpropagation through wall to wall impacts, so I needed to curate the experience of each one.
+    </p>
+  </section>
+  <section>
+    <h2>Theseus's Labyrinth and Ariadne's Thread</h2>
+    <p>
+    The most famous maze in human history and mythology is inarguably the Labyrinth. After the tyrant King of Crete insulted the great and petty god Poseidon by withholding a sacrificial bull, the god responded in kind by cursing the queen to give birth to the Minotaur. This beast was not to roam free, and the queen would not stand for her son to be slain, so King Minos had his personal enslaved inventor, Daedalus, create a structure so abstract, that no soul would ever escape. The Minotaur was imprisoned in this Labyrinth, and many a soul were fed to it. My point here is that this was literally a metaphor for an unsolvable puzzle. So how would one solve it? <br><br>
+    Along came Theseus, a son of Athens, to conquer the maze and slay the Minotaur. The mythology of Theseus very specifically painted him as a simple minded man, which fits very much into the rat theme, so the question still stands, how would this dull man solve my Labyrinth?<br><br>
+    Along comes Ariadne, princess of Crete. She was a quick-witted girl, although that does not account for taste. She falls for the Athenian prince upon meeting him, and not being one to stand by, she derives a plan for Theseus. Now Ariadne had seen the work of Daedalus, and knew the nature of his maze. A maze does not shift, it does not change. To solve it would be to create a static reference to the origin of Theseus's journey within the Labyrinth. <br><br>
+    In the night, she descends upon him, gifting him a sword to slay the Minotaur, and to conquer the Labyrinth, simple red thread. She instructed him to unravel the thread as he explores the maze, so he would always have a path back to freedom. It works exactly as designed, and Theseus does indeed slay the beast and conquer the maze.
+    </p>
+  </section>
+  <section>
+    <h2>Breadth-First Search Algorithm</h2>
+    <p>
+    My thread was a breadth-first search algorithm. This algorithm works by starting at the origin, and pathing in each direction, determining what array cell was free and what cell was blocked. Each cell that was reached (i.e. each free cell) would repeat the process until eventually this path reaches the goal. After trimming the fat off of the path, you get the shortest route from entrance to the cheese. I feed this path to my dull rat, and the algorithm can learn the maze while always having a reference to it's own origin, never getting lost. Each generation now is seeded with the exploited knowledge of the shortest route to the goal state.<br>
+    My new rats floored me. They had successfully solved the maze, and not only that, but they had done so in 21 epochs. I of course intensified my experimentation, and the final artifact features an algorithm that solves a 10x10 maze in less than 150 epochs.
+    </p>
+  </section>
+</main>
+
+
+<footer>
+  <p>© 2025 James Kajem</p>
+</footer>
+
+<script>
+  const coll = document.getElementsByClassName("collapsible");
+  for (let i=0;i<coll.length;i++){
+    coll[i].addEventListener("click", function(){
+      this.classList.toggle("active");
+      const content = this.nextElementSibling;
+      content.style.display = (content.style.display === "block") ? "none" : "block";
+    });
+  }
+</script>
+
+</body>
+</html>

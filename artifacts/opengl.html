@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>OpenGL Hat Animation – Software Design & Engineering</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <h1>OpenGL Hat Animation</h1>
+  <nav><a href="../index.html">← Back to Portfolio</a></nav>
+</header>
+
+<main>
+  <section>
+    <h2>Original Artifact</h2>
+    <p>
+      A C++ OpenGL project developed in a computer graphics course. The original version displayed a static 3D hat model rendered with basic GLSL shaders and Phong lighting. Visually functional.
+    </p>
+    <p>
+      However, this artifact lacked any dynamic element to it, meaning that every aspect of the project, specifically the transform logic, was static. Targeting such an element required usage of the <code>glfwGetTime()</code> function, which provided a tick I could reference. This allowed me to introduce dynamic elements to my scene.
+    </p>
+  </section>
+
+  <section>
+    <h2>Base Code Review</h2>
+    <video controls width="640">
+      <source src="../assets/videos/OpenGLReview.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+  </section>
+  
+  <section>
+    <h2>Enhancement Implemented</h2>
+    <p>
+      The enhancement involved adding rotation to the hat model, targeting the vector transformation code in my SceneManager class: <br> 
+      <code>	glm::vec3 scaleXYZ;<br>
+	    float spinAngle = static_cast<float>(glfwGetTime()) * 30.0f;<br>
+	    float XrotationDegrees = 0.0f;<br>
+	    float YrotationDegrees = spinAngle;<br>
+	    float ZrotationDegrees = 0.0f;<br>
+      <br>
+	    glm::vec3 positionXYZ;<br>
+      <br>
+      scaleXYZ = glm::vec3(7.0f, 7.0f, 7.0f);<br>
+      XrotationDegrees = 0.0f;<br>
+      YrotationDegrees = spinAngle;<br>
+      ZrotationDegrees = 0.0f;<br>
+      positionXYZ = glm::vec3(0.0f, -3.0f, 10.0f);</code><br>
+      <br>
+      Note spinAngle, which assigned the value of 30.0 float multiplied along a manual tick of <code>glfwGetTime()</code>
+    </p>
+    <ul>
+      <li>Adding delta time tracking to the update loop</li>
+      <li>Adjusting the transformation matrix for continuous axis rotation</li>
+      <li>Managing transformation order in the chain to maintain visual correctness</li>
+    </ul>
+    <p>
+      This change transformed a static scene into a dynamic one, setting the stage for broader animation features.
+    </p>
+  </section>
+
+  <section>
+    <h2>Enhancement Demonstration</h2>
+    <video controls width="640">
+      <source src="../assets/videos/opengllow.mov" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+  </section>
+
+
+  <section>
+    <h2>Artifact Narrative</h2>
+    <p>
+      This artifact I selected for enhancement is a C++ OpenGL project originally developed in a computer graphics course. The original version displayed a static 3D hat model rendered with basic shaders and Phong lighting. While it is visually functional, it lacked any dynamic motion or animation, making it ideal for enhancement in the area of software design.
+    </p>
+    <p>
+      It reflects my understanding of object-oriented programming, viewport scene programming, and shader programming, but most importantly, my personal passions for programming. What got me into this field are all in the form of graphics and 3D programming. I have used Blender since I was ten years old, and I remember the day Unreal Engine 4 was released. Ideally, my computer science career will not be one in database management or cybersecurity, but rather one in game development and animation. Despite my personal hobby being in this vein of programming, using OpenGL has repeatedly and fundamentally overhauled my understanding of graphics and rendering. Using a graphics library to build these scenes rather than an engine has given me a wholly new appreciation for the field, and I want to now translate that into animation. Admittedly, this milestone has not quite made the strides I had hoped for yet, as I spent most of my time in this module on research of programming spatial transformations in such a raw format.
+    </p>
+    <p>
+      The enhancement I implemented however, was adding rotation to the hat model. I rewrote portions of the SceneManager class to introduce said transformation logic, which applies rotation over a delta time. This involved modifying the update loop to include delta time tracking, and adjusting the transformation matrix to apply a continuous axis rotation. This change turned the static scene into a dynamic one, better representing my future enhancements for this project, which will be a wider implementation of animation. One that might abandon the hat project entirely (only so many ways to animate a hat).
+    </p>
+    <p>
+      During the process, I deepened my understanding of transformation matrices and scene/graphic updates. I ran into challenges with the order and timing, which I resolved by merely managing the order of operations in the transformation chain. It was a solid refresher in debugging graphical output based on underlying matrix math, which is always a reminder of how critically precise real-time graphic programming is, just ask a vector.
+    </p>
+  </section>
+</main>
+
+<footer>
+  <p>© 2025 James Kajem</p>
+</footer>
+</body>
+</html>
