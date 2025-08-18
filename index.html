@@ -8,22 +8,32 @@
 </head>
 <body>
   <header>
-    <h1>My Computer Science ePortfolio</h1>
-    <nav>
-      <ul>
-        <li><a href="artifacts/opengl.html">Software Design & Engineering</a></li>
-        <li><a href="artifacts/maze-ai.html">Algorithms & Data Structures</a></li>
-        <li><a href="artifacts/fullstack-db.html">Databases</a></li>
-      </ul>
-    </nav>
+    <h1>Computer Science ePortfolio</h1>
   </header>
 
   <main>
     <section>
       <h2>Professional Self-Assessment</h2>
       <p>
-       under construction...
+      Completing the Computer Science program is the professional turning point of my academic career. I understand what this means for me and my future. This particular curriculum challenged me to move past the surface-level functionalities of previous designs and work deeply within my own programming and learn to refine my own work. This portfolio is designed to showcase that, and will display my core computer science disciplines and the ability to apply those concepts in practical, applied projects.<br><br>
+      These artifacts are not isolated accomplishments, they are a displayed progression of how I approach problem-solving. Each one began its life as a system with limitations—some in efficiency, almost all in structure—and through analysis and refinement of my own systems, I reworked them all into projects that are more efficient, better structured, and quite simply, stronger. These artifacts range within the fields of software engineering, graphics programming, database systems, and neural network algorithms. <br><br>
+      Most importantly, my work demonstrates the way I think: I identify weaknesses, design with ever-refining troubleshooting, and implement enhancements that create lasting effects. This is my portfolio.<br>
       </p>
+      <h2>OpenGL Software Design</h2>
+      <li><a href="artifacts/opengl.html">Software Design & Engineering</a></li>
+      <p>
+      OpenGL is a special software to me, as I am a personal enjoyer of many graphic and rendering softwares. I have been using Blender since I was twelve years old and I can still remember the Unreal Engine 4 release day. After all of these years of game and graphic programming through the medium of an engine, never had I interacted with graphics or rendering on such an intimate level as I did with OpenGL. This ancient open-sourced software to me, are the giant shoulders that modern graphic titans stand upon. I believe that without the existence and collaboration of OpenGL, the development of graphics programming would have been severely stunted. All of this is to say that OpenGL gave me a new appreciation and understanding for graphics and design.<br>
+      This particular project began as a static 3D model rendered with basic GLSL shaders and lit with Phong lighting, so the enhancement I was to make would be to switch up the static nature of it. I animated the mesh by rewriting the SceneManager class to incorporate a delta-time tracking and use this as a reference point for transforming the static matrices into continuously rotating vectors. I debugged and editted transformation logic at the lowest level as I ever had, which further reinforced my foundational understanding of object-oriented graphical coding. I will take this knowledge into my own current hobbies and ideally eventual career.<br>
+      </p>
+      <h2>Neural Network Labyrinth Algorithm</h2>
+      <li><a href="artifacts/maze-ai.html">Algorithms & Data Structures</a></li>
+      <p>
+      This one is interesting, initially this project was from a neural network course I took, where the central idea was to create a brute-force reinforcement algorithm that would eventually solve a 5x5 maze array through a rather forceful exploration vs. exploitation factor. This did indeed solve the maze, but it took the algorithm close to 2000 epochs to do so, with potentially thousands of steps in between. This is memory that my hardware simply did not have. <br>
+      I spent sleepless nights working at refining the neural net before finally coming to the conclusion that it needed an overhaul if it were to solve this thing in a feasible amount of time. The solution I present now is inspired by the way the original Labyrinth was solved, with simple thread. The thread in my case is a breadth-first search algorithm, which results in the shortest possible path from the start to the goal. I seed this data into my neural network, so it can learn the maze with a critical solution already seeded in memory. The results were astounding, within 21 epochs, the maze was solved, and within 50, the entire maze was mapped out. This hybrid system completely erases the need for exploitation, and the current artifact showcases a 10x10 Labyrinth array solved within 150 epochs. <br>
+      </p>
+      <h2>Full-Stack Databasing</h2>
+      <li><a href="artifacts/fullstack-db.html">Databases</a></li>
+      <p>This final artifact involved rebuilding a full-stack application's database layer. I transitioned the backend from a static MongoDB to a relational PostreSQL, designed the relational schema from scrathc, and integrated Prisma for a type-safe ORM functionality. I then authored a custom Node.js migration script that transformed the original dataset into the relational model, so the original database could still be editted from the frontend with admin access. This process went through routing hell, but I eventually reconciled all structual differences between the document storing and the relational system all while maintaining the Express routing. The security threats to this system came in the form of database access credentials, so I created a superuser with direct control access to those allowed into the database. This superuser also overlooks the original admin users, so as long as this very important user isn't phished, the stack is secure.</p>
     </section>
 
 
